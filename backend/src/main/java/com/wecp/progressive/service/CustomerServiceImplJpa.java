@@ -1,89 +1,90 @@
 package com.wecp.progressive.service;
- 
-import java.sql.SQLException;
-import java.util.List;
- 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
- 
+
+
 import com.wecp.progressive.entity.Customers;
+import com.wecp.progressive.exception.CustomerAlreadyExistsException;
 import com.wecp.progressive.repository.CustomerRepository;
- 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 @Service
-public class CustomerServiceImplJpa implements CustomerService{
- 
+public class CustomerServiceImplJpa implements CustomerService {
+
+    private final CustomerRepository customerRepository;
+
     @Autowired
-    private CustomerRepository customerRepository;
- 
+    public CustomerServiceImplJpa(CustomerRepository customerRepository) {
+        this.customerRepository = customerRepository;
+    }
+
+    private static List<Customers> customersList = new ArrayList<>();
     @Override
-    public List<Customers> getAllCustomers() throws SQLException {
+    public List<Customers> getAllCustomers() {
         return customerRepository.findAll();
-        // TODO Auto-generated method stub
-       // throw new UnsupportedOperationException("Unimplemented method 'getAllCustomers'");
     }
- 
+
     @Override
-    public Customers getCustomerById(int customerId) throws SQLException {
-        // TODO Auto-generated method stub
-        return customerRepository.findById(customerId).get();
-        //throw new UnsupportedOperationException("Unimplemented method 'getCustomerById'");
+    public Customers getCustomerById(int customerId) {
+        return customerRepository.findByCustomerId(customerId);
     }
- 
+
     @Override
-    public int addCustomer(Customers customers) throws SQLException {
-        // TODO Auto-generated method stub
+    public int addCustomer(Customers customers) {
+        Customers customers1 = customerRepository.findByNameAndEmail(customers.getName(), customers.getEmail());
+        if (customers1 != null) {
+            throw new CustomerAlreadyExistsException("Customer already exists");
+        }
+        return customerRepository.save(customers).getCustomerId();
+    }
+
+    @Override
+    public void updateCustomer(Customers customers) {
         customerRepository.save(customers);
-        return customers.getCustomerId();
-       // throw new UnsupportedOperationException("Unimplemented method 'addCustomer'");
     }
- 
+
     @Override
-    public void updateCustomer(Customers customers) throws SQLException {
-        // TODO Auto-generated method stub
-        customerRepository.save(customers);
-       // throw new UnsupportedOperationException("Unimplemented method 'updateCustomer'");
+    @Transactional
+    @Modifying
+    public void deleteCustomer(int customerId) {
+        customerRepository.deleteByCustomerId(customerId);
     }
- 
+
     @Override
-    public void deleteCustomer(int customerId) throws SQLException {
-        // TODO Auto-generated method stub
-        customerRepository.deleteById(customerId);
-      //  throw new UnsupportedOperationException("Unimplemented method 'deleteCustomer'");
+    public List<Customers> getAllCustomersSortedByName() {
+        List<Customers> sortedCustomers = customerRepository.findAll();
+        Collections.sort(sortedCustomers);
+        return sortedCustomers;
     }
- 
-    @Override
-    public List<Customers> getAllCustomersSortedByName() throws SQLException {
-       return customerRepository.getAllCustomersSortedByName();
-        // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'getAllCustomersSortedByName'");
-    }
- 
+
+
+
+    // The methods mentioned below have to be used for storing and manipulating data in an ArrayList.
     @Override
     public List<Customers> getAllCustomersFromArrayList() {
-        return null;
-        // TODO Auto-generated method stub
-       // throw new UnsupportedOperationException("Unimplemented method 'getAllCustomersFromArrayList'");
+        return customersList;
     }
- 
+
     @Override
     public List<Customers> addCustomersToArrayList(Customers customers) {
-        return null;
-        // TODO Auto-generated method stub
-       // throw new UnsupportedOperationException("Unimplemented method 'addCustomersToArrayList'");
+        customersList.add(customers);
+        return customersList;
     }
- 
+
     @Override
     public List<Customers> getAllCustomersSortedByNameFromArrayList() {
-        return null;
-        // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'getAllCustomersSortedByNameFromArrayList'");
+        List<Customers> sortedCustomers = customersList;
+        Collections.sort(sortedCustomers);
+        return sortedCustomers;
     }
- 
+
     @Override
     public void emptyArrayList() {
-       
-        // TODO Auto-generated method stub
-        //throw new UnsupportedOperationException("Unimplemented method 'emptyArrayList'");
+        customersList = new ArrayList<>();
     }
-   
 }
