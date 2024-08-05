@@ -6,13 +6,8 @@ import { AccountTS } from '../../types/tstypes/Accountts';
   standalone: true,
   imports: [],
   templateUrl: './accountsample.component.html',
-  styleUrls:[ './accountsample.component.css']
+  styleUrls: ['./accountsample.component.css']
 })
 export class AccountsampleComponent {
-  account:AccountTS;
-  construnctor(){
-    this.account = new AccountTS('1',101,'10000.00');
-  }
-  
-
+   account:AccountTS=new AccountTS("1",500.00,"1");
 }
